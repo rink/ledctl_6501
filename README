@@ -1,0 +1,39 @@
+ledctl_6501
+===========
+
+Soekris net6501 LED control tool
+Author: Stefan Rink <stefan.rink@dynamic.de>
+To be released as GPL
+
+Usage:
+  ledctl_6501 [--red=0/1] [--green=0/1] [--verbose] [--help]
+
+
+
+Source of Information:
+http://lists.soekris.com/pipermail/soekris-tech/2011-October/017729.html
+
+on the net6501:
+Red Error LED:   I/O port 069C bit 0, 0=off, 1=on.
+Green Ready LED: I/O port 069D bit 0, 0=off, 1=on.
+Info to be included on next release of manual.
+
+
+
+
+================= LICENSE: GPL =====================
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2, or (at your option)
+any later version.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+General Public License for more details.
+
+You should have received a copy of the GNU General Public License with your
+Debian GNU/Linux system, in /usr/share/common-licenses/GPL, or with the
+Debian GNU/Linux bc source package as the file COPYING.  If not, write to the
+Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
+MA 02110-1301, USA.
