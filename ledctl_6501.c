@@ -1,3 +1,29 @@
+/********************************************************************************
+ *
+ * Filename: ledctl_6501.c
+ *
+ * ledctl_6501
+ * Program that allows control over the 'Ready' and 'Error' LEDs on the
+ * Soekris Engineering net6501 computer.
+ *
+ *   Copyright (C) 2014  Stefan Rink, Victor Perez
+ * 
+ *   This program is free software; you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation; either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License along
+ *   with this program; if not, write to the Free Software Foundation, Inc.,
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ *******************************************************************************/
+
 /*
 http://lists.soekris.com/pipermail/soekris-tech/2011-October/017729.html
 
@@ -13,8 +39,14 @@ Info to be included on next release of manual.
 #include <stdlib.h>
 #include <unistd.h>
 #include <getopt.h>
-#include <sys/io.h>
+#include <sys/param.h>
 
+#if defined(__linux__)
+#include <sys/io.h>
+#elif defined(BSD)
+#include <machine/cpufunc.h>
+#include <machine/sysarch.h>
+#endif
 
 #define IOPORTS_6501_BASE 0x69C
 #define IOPORTS_6501_NUM  2
@@ -133,14 +165,23 @@ void iowrite_single(int val, int port)
 {
   if (val == 0 || val == 1)
   {
-    outb(val, port);
+#if defined(__linux__) 
+      outb(val, port);
+#elif defined(BSD) 
+      outb(port, val);
+#endif
   }
 }
 
 void iowrite_prepare(void)
 {
   //get I/O port permissions
-  int status = ioperm(IOPORTS_6501_BASE, IOPORTS_6501_NUM, 1);
+
+#if defined(__linux__) 
+    int status = ioperm(IOPORTS_6501_BASE, IOPORTS_6501_NUM, 1);
+#elif defined(BSD) 
+    int status = i386_set_ioperm(IOPORTS_6501_BASE, IOPORTS_6501_NUM, 1);
+#endif
 
   if (status != 0)
   {
