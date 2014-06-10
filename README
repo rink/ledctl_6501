@@ -1,16 +1,22 @@
+===========
 ledctl_6501
 ===========
+Program that allows control over the 'Ready' and 'Error' LEDs on the 
+Soekris Engineering net6501 computer. 
 
 Soekris net6501 LED control tool
 Author: Stefan Rink <stefan.rink@dynamic.de>
 To be released as GPL
 
-Usage:
-  ledctl_6501 [--red=0/1] [--green=0/1] [--verbose] [--help]
+Modified: Victor Perez, 20140609
+Updated to support building with FreeBSD 8.3 i386 targets. 
+The FreeBSD executable can also be used on a net6501 machine running 
+pfSense. One use case for LED control is to provide a quick indication of
+network status.
 
-
-
+======================
 Source of Information:
+======================
 http://lists.soekris.com/pipermail/soekris-tech/2011-October/017729.html
 
 on the net6501:
@@ -18,10 +24,48 @@ Red Error LED:   I/O port 069C bit 0, 0=off, 1=on.
 Green Ready LED: I/O port 069D bit 0, 0=off, 1=on.
 Info to be included on next release of manual.
 
+======================
+Required Hardware
+======================
+Soekris Engineering net6501
 
+Note that the source can be built on generic x86 architecture machines, but the 
+executable should be run on a net6501 machine to support control of the LEDs.
 
+======================
+Supported OS Platforms
+======================
+1. Linux
+2. FreeBSD 8.3 32-bit
+3. pfSense 2.1 32-bit
+   The program source can be built on a FreeBSD 8.3 x86 computer, and then 
+   copied to a pfSense net6501 machine for execution.
 
-================= LICENSE: GPL =====================
+====================
+Build Requirements
+====================
+1. GNU C Compiler
+2. GNU Make
+
+====================
+Building
+====================
+
+On Linux targets:
+
+    make all
+
+On FreeBSD targets:
+
+    gmake all
+
+====================
+Program Usage
+====================
+
+   ledctl_6501 [--red=0/1] [--green=0/1] [--verbose] [--help]
+
+========================== LICENSE =================================
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 2, or (at your option)
@@ -32,8 +76,5 @@ WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 General Public License for more details.
 
-You should have received a copy of the GNU General Public License with your
-Debian GNU/Linux system, in /usr/share/common-licenses/GPL, or with the
-Debian GNU/Linux bc source package as the file COPYING.  If not, write to the
-Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
-MA 02110-1301, USA.
+A copy of GNU GLP version 2 license is included with this source.
+
