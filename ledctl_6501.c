@@ -40,6 +40,7 @@ Info to be included on next release of manual.
 #include <unistd.h>
 #include <getopt.h>
 #include <sys/param.h>
+#include <time.h>
 
 #if defined(__linux__)
 #include <sys/io.h>
@@ -57,10 +58,14 @@ int verbose_flag=0;
 int value_red=-1;   /* 1:on, 0:off, -1:unchanged */
 int value_green=-1; /* 1:on, 0:off, -1:unchanged */
 int demomode_flag=0;
+int alternate_flag=0;
+float blink_time=1;
+float blink_time2=0;
+int blink_timeout=60;
 
 void usage(char *argv0)
 {
-  printf("Usage: %s [--red=0/1] [--green=0/1] [--verbose] [--help]\n\n", argv0);
+  printf("Usage: %s [--red=0/1] [--green=0/1] [--demo] [--alternate] [--time=0.5] [--time2=1.6] [--timeout=60] [--verbose] [--help]\n\n", argv0);
   exit(2);
 }
 
@@ -74,8 +79,12 @@ void parseopt(int argc, char **argv)
       {"verbose", no_argument,       &verbose_flag, 1},
       {"quiet",   no_argument,       &verbose_flag, 0},
       {"demo",    no_argument,       &demomode_flag, 1},
+      {"alternate",no_argument,       &alternate_flag, 1},
       /* These options don't set a flag.
       We distinguish them by their indices. */
+      {"time",    required_argument, 0, 't'},
+      {"time2",    required_argument, 0, 'u'},
+      {"timeout", required_argument, 0, 'v'},
       {"red",     required_argument, 0, 'r'},
       {"error",   required_argument, 0, 'r'},
       {"green",   required_argument, 0, 'g'},
@@ -87,7 +96,7 @@ void parseopt(int argc, char **argv)
     int option_index = 0;
     char c;
      
-    c = getopt_long (argc, argv, "r:g:h", long_options, &option_index);
+    c = getopt_long (argc, argv, "t:r:g:h", long_options, &option_index);
      
     /* Detect the end of the options. */
     if (c == -1)
@@ -116,6 +125,24 @@ void parseopt(int argc, char **argv)
         if (verbose_flag)
           printf("DEBUG: green \"%s\"\n", optarg);
         value_green = strtol(optarg, NULL, 0);
+        break;
+
+      case 't':
+        if (verbose_flag)
+          printf("DEBUG: time \"%s\"\n", optarg);
+        blink_time = strtof(optarg, NULL);
+        break;
+
+      case 'u':
+        if (verbose_flag)
+          printf("DEBUG: time \"%s\"\n", optarg);
+        blink_time2 = strtof(optarg, NULL);
+        break;
+
+      case 'v':
+        if (verbose_flag)
+          printf("DEBUG: timeout \"%s\"\n", optarg);
+        blink_timeout = strtol(optarg, NULL, 0);
         break;
      
       case 'h':
@@ -216,13 +243,62 @@ int main(int argc, char **argv)
 
   if (demomode_flag)
   {
-    while(1)
+    int blink_value_green = value_green ;
+    int blink_value_red = value_red ;
+    int ublink_time = blink_time * 1000000;
+    int ublink_time2 = blink_time2 * 1000000;
+    int i = 0;
+    time_t endwait;
+    time_t start = time(NULL);
+    time_t seconds = blink_timeout;
+    endwait = start + seconds;
+
+    while(start < endwait)
     {
-      sleep(1);
-      flip(&value_red);
-      flip(&value_green);
-      iowrite();
+      if (ublink_time2==0){
+        usleep(ublink_time);
+      }
+      else {
+	if (i%4!=1){
+	  usleep(ublink_time);
+	}
+	else {
+          if (alternate_flag) {
+            iowrite_single(0,   IOPORTS_6501_RED);
+            iowrite_single(0, IOPORTS_6501_GREEN);
+          }
+	  usleep(ublink_time2);
+	}
+      }
+      i += 1;
+      if (verbose_flag){
+        printf("green : %d\n", blink_value_green);
+        printf("red : %d\n", blink_value_red);
+      }
+      if (alternate_flag) {
+	if (i%2==0){
+	  blink_value_red = 1;
+	  blink_value_green = 0;
+	}
+	else {
+	  blink_value_red = 0;
+	  blink_value_green = 1;
+	}
+      }
+      else {
+        if (value_red == 1){
+          flip(&blink_value_red);
+        }
+        if (value_green == 1){
+          flip(&blink_value_green);
+        }
+      }
+      iowrite_single(blink_value_red,   IOPORTS_6501_RED);
+      iowrite_single(blink_value_green, IOPORTS_6501_GREEN);
+      start = time(NULL);
     }
+    iowrite_single(0,   IOPORTS_6501_RED);
+    iowrite_single(0, IOPORTS_6501_GREEN);
   }
 
   if (verbose_flag)
